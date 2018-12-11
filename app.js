@@ -12,7 +12,7 @@ mongoose.Promise = require('bluebird');
 var index = require('./routes/index');
 var users = require('./routes/users');
 
-mongoose.connect('mongodb://127.0.0.1/michaelDB');
+mongoose.connect('mongodb://127.0.0.1/michaelDB',  { useNewUrlParser: true });
 
 var app = express();
 
@@ -28,7 +28,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', index);  
+app.use('/', index);
 app.use('/users', users);
 
 // catch 404 and forward to error handler

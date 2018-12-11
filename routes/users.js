@@ -1,30 +1,39 @@
-var express = require('express');
-var router = express.Router();
-var User = require('../models/user');
+let express = require('express');
+let router = express.Router();
+let User = require('../models/user');
+let { getUsers, getUserById, createUser } = require('./promise/users');
 
 router.get('/', (req, res) => {
-  User.find({}, (err, data) => {
-    if(err) throw err;
-    res.send({"data": data});
-  });
+  let getUserPromise = getUsers();
+  getUserPromise.then(function(usersDetails) {
+        res.send(usersDetails)
+    }, (err) => {
+        console.log(err);
+    });
 });
 
-router.get('/:userId', (req, res) => {
-  User.find({"_id": req.params.userId}, (err, list) => {
-    if(err) throw err;
-    res.send({"data": list});
+router.get('/:userId', async (req, res) => {
+  let getUserByIdPromise = getUserById(req.params.userId);
+  getUserByIdPromise.then( (userDetails) => {
+    res.send(userDetails)
+  }, (err) => {
+    res.send(err)
   });
+
 });
 
 
 router.post('/create', (req, res) => {
-  var newUser = new User();
-  newUser.username = req.body.username;
-  newUser.password = req.body.password;
-  newUser.save(function(err, result) {
-    if(err) throw err;
-    res.send({"data": result});
-  });
+  let formData = {
+    username: req.body.username,
+    password: req.body.password
+  }
+  let createUserPromise = createUser(formData);
+  createUserPromise.then( (result) => {
+    res.send(result)
+  }, (err) => {
+    res.send(err)
+  })
 });
 
 router.put('/:userId', (req, res) => {
