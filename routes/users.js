@@ -1,7 +1,7 @@
 let express = require('express');
 let router = express.Router();
 let User = require('../models/user');
-let { getUsers, getUserById, createUser } = require('./promise/users');
+let { getUsers, getUserById, createUser, updateUser, deleteUser } = require('./promise/users');
 
 router.get('/', (req, res) => {
   let getUserPromise = getUsers();
@@ -19,34 +19,43 @@ router.get('/:userId', async (req, res) => {
   }, (err) => {
     res.send(err)
   });
-
 });
 
 
-router.post('/create', (req, res) => {
+router.post('/', (req, res) => {
   let formData = {
     username: req.body.username,
     password: req.body.password
   }
-  let createUserPromise = createUser(formData);
-  createUserPromise.then( (result) => {
-    res.send(result)
-  }, (err) => {
-    res.send(err)
-  })
+  if(formData){
+    let createUserPromise = createUser(formData);
+    createUserPromise.then( (result) => {
+      res.status(201).send(result)
+    }, (err) => {
+      res.status(500).send(err)
+    })
+  }else{
+    res.status(400).send({"message": "Invalid parameters"})
+  }
 });
 
 router.put('/:userId', (req, res) => {
-  User.findByIdAndUpdate(req.params.userId, {$set: req.body}, (err, result) => {
-    if(err) throw err;
-    res.send({"data": result});
+  let body = req.body;
+  let id = req.params.id;
+  let updateUserPromise = updateUser(id, body);
+  updateUserPromise.then( (result) => {
+    res.send(result)
+  }, (err) => {
+    res.send(err)
   });
 });
 
 router.delete('/:userId', (req, res) => {
-  User.findByIdAndRemove(req.params.userId, (err, result) => {
-    if(err) throw err;
-    res.send({"data": result})
+  let deleteUserPromise = deleteUser(req.params.userId);
+  deleteUserPromise.then( result => {
+    res.send(result);
+  }, err => {
+    res.send(err);
   });
 });
 
